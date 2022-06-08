@@ -7,7 +7,8 @@
 import Foundation
 
 @available(iOS 13, macOS 10.15, *)
-public class DataGroup {
+@objc
+public class DataGroup: NSObject {
     public var datagroupType : DataGroupId = .Unknown
     
     /// Body contains the actual data
@@ -19,6 +20,8 @@ public class DataGroup {
     var pos = 0
     
     required init( _ data : [UInt8] ) throws {
+        super.init()
+        
         self.data = data
         
         // Skip the first byte which is the header byte

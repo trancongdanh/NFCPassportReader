@@ -10,10 +10,12 @@ import OpenSSL
 import CryptoTokenKit
 
 @available(iOS 13, macOS 10.15, *)
-public class OpenSSLUtils {
+@objc
+public class OpenSSLUtils: NSObject {
     private static var loaded = false
     
     /// Returns any OpenSSL Error as a String
+    @objc
     public static func getOpenSSLError() -> String {
         
         guard let out = BIO_new(BIO_s_mem()) else { return "Unknown" }
@@ -91,6 +93,11 @@ public class OpenSSLUtils {
         return str
     }
     
+    @objc
+    public static func pkcs7DataToPEM( pkcs7Str: String ) -> String {
+        let data = Data(pkcs7Str.utf8)
+        return pkcs7DataToPEM(pkcs7: data)
+    }
     
     /// Extracts a X509 certificate in PEM format from a PKCS7 container
     /// - Parameter pkcs7Der: The PKCS7 container in DER format
@@ -135,6 +142,13 @@ public class OpenSSLUtils {
         }
         
         return ret
+    }
+    
+    @objc
+    public static func getX509CertificatesFromPKCS7( pkcs7DerStr : String ) throws -> [X509Wrapper] {
+        let pkcs7Der = Data(pkcs7DerStr.utf8)
+        
+        return try getX509CertificatesFromPKCS7(pkcs7Der: pkcs7Der)
     }
     
     /// Checks whether a trust chain can be built up to verify a X509 certificate. A CAFile containing a list of trusted certificates (each in PEM format)
@@ -200,6 +214,18 @@ public class OpenSSLUtils {
         return .failure(OpenSSLError.UnableToVerifyX509CertificateForSOD("Unable to get issuer certificate - not found"))
     }
     
+    @objc
+    public static func verifyTrustAndGetIssuerCertificateObjc( x509 : X509Wrapper, CAFile : URL ) throws -> X509Wrapper {
+        let result = verifyTrustAndGetIssuerCertificate(x509: x509, CAFile: CAFile)
+        
+        switch result {
+            case .success(let csca):
+                return csca
+            case .failure(let error):
+                throw error
+        }
+    }
+    
     
     /// Verifies the signed data section against the stored certificate and extracts the signed data section from a PKCS7 container (if present and valid)
     /// - Parameter pkcs7Der: The PKCS7 container in DER format
@@ -246,6 +272,12 @@ public class OpenSSLUtils {
         return sigData
     }
     
+    @objc
+    public static func verifyAndReturnSODEncapsulatedDataUsingCMSObjc( sod : SOD ) throws -> String {
+        let data = try verifyAndReturnSODEncapsulatedDataUsingCMS(sod: sod)
+        let str = String(decoding: data, as: UTF8.self)
+        return str;
+    }
     
     static func verifyAndReturnSODEncapsulatedData( sod : SOD ) throws -> Data {
         
@@ -275,6 +307,13 @@ public class OpenSSLUtils {
         return encapsulatedContent
     }
     
+    @objc
+    public static func verifyAndReturnSODEncapsulatedDataObjc( sod : SOD ) throws -> String {
+        let data = try verifyAndReturnSODEncapsulatedData(sod: sod)
+        let str = String(decoding: data, as: UTF8.self)
+        return str;
+    }
+    
     /// Parses a signed data structures encoded in ASN1 format and returns the structure in text format
     /// - Parameter data: The data to be parsed in ASN1 format
     /// - Returns: The parsed data as A String
@@ -298,7 +337,11 @@ public class OpenSSLUtils {
         return parsed
     }
     
-    
+    @objc
+    public static func ASN1Parse( dataStr: String ) throws -> String {
+        let data = Data(dataStr.utf8)
+        return try ASN1Parse(data: data)
+    }
     
     /// Reads an RSA Public Key  in DER  format and converts it to an OpenSSL EVP_PKEY value for use whilst decrypting or verifying an RSA signature
     /// - Parameter data: The RSA key in DER format
@@ -527,7 +570,8 @@ public class OpenSSLUtils {
     }
 
     @available(iOS 13, macOS 10.15, *)
-    static func generateAESCMAC( key: [UInt8], message : [UInt8] ) -> [UInt8] {
+    @objc
+    public static func generateAESCMAC( key: [UInt8], message : [UInt8] ) -> [UInt8] {
         let ctx = CMAC_CTX_new();
         defer { CMAC_CTX_free(ctx) }
         var key = key
@@ -551,7 +595,8 @@ public class OpenSSLUtils {
     }
     
     @available(iOS 13, macOS 10.15, *)
-    static func asn1EncodeOID (oid : String) -> [UInt8] {
+    @objc
+    public static func asn1EncodeOID (oid : String) -> [UInt8] {
         
         let obj = OBJ_txt2obj( oid.cString(using: .utf8), 1)
         let payloadLen = i2d_ASN1_OBJECT(obj, nil)

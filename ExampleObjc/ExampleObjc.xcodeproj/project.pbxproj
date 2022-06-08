@@ -19,8 +19,7 @@
 		9143CB0D2850773100DE44F9 /* ExampleObjcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9143CB0C2850773100DE44F9 /* ExampleObjcTests.m */; };
 		9143CB172850773200DE44F9 /* ExampleObjcUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9143CB162850773200DE44F9 /* ExampleObjcUITests.m */; };
 		9143CB192850773200DE44F9 /* ExampleObjcUITestsLaunchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9143CB182850773200DE44F9 /* ExampleObjcUITestsLaunchTests.m */; };
-		9143CB2A285079EE00DE44F9 /* NFCPassportReaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9143CB29285079EE00DE44F9 /* NFCPassportReaderTests.m */; };
-		9143CB2D28507E4400DE44F9 /* UtilsObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 9143CB2C28507E4400DE44F9 /* UtilsObjc.m */; };
+		918004492850922900F99383 /* OpenSSLUtilsObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 918004482850922900F99383 /* OpenSSLUtilsObjc.m */; };
 		BD54B138E8AE54BAA492F6E4 /* Pods_ExampleObjcTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF467CA0B47E5E5398E1811B /* Pods_ExampleObjcTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -66,9 +65,8 @@
 		9143CB162850773200DE44F9 /* ExampleObjcUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExampleObjcUITests.m; sourceTree = "<group>"; };
 		9143CB182850773200DE44F9 /* ExampleObjcUITestsLaunchTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExampleObjcUITestsLaunchTests.m; sourceTree = "<group>"; };
 		9143CB262850788E00DE44F9 /* ExampleObjc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ExampleObjc-Bridging-Header.h"; sourceTree = "<group>"; };
-		9143CB29285079EE00DE44F9 /* NFCPassportReaderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NFCPassportReaderTests.m; sourceTree = "<group>"; };
-		9143CB2B28507CB600DE44F9 /* UtilsObjc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UtilsObjc.h; sourceTree = "<group>"; };
-		9143CB2C28507E4400DE44F9 /* UtilsObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UtilsObjc.m; sourceTree = "<group>"; };
+		918004472850921A00F99383 /* OpenSSLUtilsObjc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenSSLUtilsObjc.h; sourceTree = "<group>"; };
+		918004482850922900F99383 /* OpenSSLUtilsObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenSSLUtilsObjc.m; sourceTree = "<group>"; };
 		9A83F6EF7A0F456C88A0A217 /* Pods-ExampleObjcUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleObjcUITests.debug.xcconfig"; path = "Target Support Files/Pods-ExampleObjcUITests/Pods-ExampleObjcUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		D65F323D79E13291BC68C6B6 /* Pods-ExampleObjcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleObjcTests.release.xcconfig"; path = "Target Support Files/Pods-ExampleObjcTests/Pods-ExampleObjcTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF467CA0B47E5E5398E1811B /* Pods_ExampleObjcTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleObjcTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,13 +132,13 @@
 				9143CAF42850773000DE44F9 /* SceneDelegate.m */,
 				9143CAF62850773000DE44F9 /* ViewController.h */,
 				9143CAF72850773000DE44F9 /* ViewController.m */,
-				9143CB2B28507CB600DE44F9 /* UtilsObjc.h */,
-				9143CB2C28507E4400DE44F9 /* UtilsObjc.m */,
 				9143CAF92850773000DE44F9 /* Main.storyboard */,
 				9143CAFC2850773100DE44F9 /* Assets.xcassets */,
 				9143CAFE2850773100DE44F9 /* LaunchScreen.storyboard */,
 				9143CB012850773100DE44F9 /* Info.plist */,
 				9143CB022850773100DE44F9 /* main.m */,
+				918004472850921A00F99383 /* OpenSSLUtilsObjc.h */,
+				918004482850922900F99383 /* OpenSSLUtilsObjc.m */,
 			);
 			path = ExampleObjc;
 			sourceTree = "<group>";
@@ -149,7 +147,6 @@
 			isa = PBXGroup;
 			children = (
 				9143CB0C2850773100DE44F9 /* ExampleObjcTests.m */,
-				9143CB29285079EE00DE44F9 /* NFCPassportReaderTests.m */,
 			);
 			path = ExampleObjcTests;
 			sourceTree = "<group>";
@@ -411,7 +408,7 @@
 				9143CAF22850773000DE44F9 /* AppDelegate.m in Sources */,
 				9143CB032850773100DE44F9 /* main.m in Sources */,
 				9143CAF52850773000DE44F9 /* SceneDelegate.m in Sources */,
-				9143CB2D28507E4400DE44F9 /* UtilsObjc.m in Sources */,
+				918004492850922900F99383 /* OpenSSLUtilsObjc.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,7 +416,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9143CB2A285079EE00DE44F9 /* NFCPassportReaderTests.m in Sources */,
 				9143CB0D2850773100DE44F9 /* ExampleObjcTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

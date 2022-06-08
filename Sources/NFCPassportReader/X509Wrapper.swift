@@ -26,13 +26,23 @@ public enum CertificateItem : String {
 }
 
 @available(iOS 13, macOS 10.15, *)
-public class X509Wrapper {
+@objc
+public class X509Wrapper: NSObject {
     public let cert : OpaquePointer
     
     public init?( with cert: OpaquePointer? ) {
         guard let cert = cert else { return nil }
         
         self.cert = X509_dup(cert)
+    }
+    
+    @objc
+    public func getItemsAsDictObjc() -> [String:String] {
+        let dict = getItemsAsDict()
+        let key = dict.keys.first
+        let value: String = dict.values.first ?? ""
+        
+        return [(key?.rawValue ?? ""):value]
     }
     
     public func getItemsAsDict() -> [CertificateItem:String] {
@@ -65,10 +75,13 @@ public class X509Wrapper {
         
         return item
     }
+    
+    @objc
     public func certToPEM() -> String {
         return OpenSSLUtils.X509ToPEM( x509:cert )
     }
     
+    @objc
     public func getFingerprint( ) -> String? {
         let fdig = EVP_sha1();
         
@@ -81,6 +94,7 @@ public class X509Wrapper {
         return arr
     }
     
+    @objc
     public func getNotBeforeDate() -> String? {
         var notBefore : String?
         if let val = X509_get0_notBefore(cert) {
@@ -90,6 +104,7 @@ public class X509Wrapper {
         
     }
     
+    @objc
     public func getNotAfterDate() -> String? {
         var notAfter : String?
         if let val = X509_get0_notAfter(cert) {
@@ -98,17 +113,20 @@ public class X509Wrapper {
         return notAfter
     }
     
+    @objc
     public func getSerialNumber() -> String? {
         let serialNr = String( ASN1_INTEGER_get(X509_get_serialNumber(cert)), radix:16, uppercase: true )
         return serialNr
     }
     
+    @objc
     public func getSignatureAlgorithm() -> String? {
         let algor = X509_get0_tbs_sigalg(cert);
         let algo = getAlgorithm( algor?.pointee.algorithm )
         return algo
     }
     
+    @objc
     public func getPublicKeyAlgorithm() -> String? {
         let pubKey = X509_get_X509_PUBKEY(cert)
         var ptr : OpaquePointer?
@@ -117,10 +135,12 @@ public class X509Wrapper {
         return algo
     }
     
+    @objc
     public func getIssuerName() -> String? {
         return getName(for: X509_get_issuer_name(cert))
     }
     
+    @objc
     public func getSubjectName() -> String? {
         return getName(for: X509_get_subject_name(cert))
     }
