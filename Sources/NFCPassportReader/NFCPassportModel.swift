@@ -295,8 +295,8 @@ public class NFCPassportModel {
         self.activeAuthenticationSignature = signature
         
         Log.verbose( "Active Authentication")
-        Log.verbose( "   challange - \(binToHexRep(challenge))")
-        Log.verbose( "   signature - \(binToHexRep(signature))")
+        Log.verbose( "   challange - \(Utils().binToHexRep(challenge))")
+        Log.verbose( "   signature - \(Utils().binToHexRep(signature))")
 
         // Get AA Public key
         self.activeAuthenticationPassed = false
@@ -443,7 +443,7 @@ public class NFCPassportModel {
                 continue
             }
             
-            let computedHashVal = binToHexRep(dgVal.hash(sodHashAlgorythm))
+            let computedHashVal = Utils().binToHexRep(dgVal.hash(sodHashAlgorythm))
             
             var match = true
             if computedHashVal != sodHashVal {

@@ -47,19 +47,40 @@ extension StringProtocol {
 
 }
 
-
-public func binToHexRep( _ val : [UInt8], asArray : Bool = false ) -> String {
-    var string = asArray ? "[" : ""
-    for x in val {
-        if asArray {
-            string += String(format:"0x%02x, ", x )
-
-        } else {
-            string += String(format:"%02x", x )
+@objc
+public class Utils: NSObject {
+    
+    @objc
+    public func binToHexRep( _ val : [UInt8], asArray : Bool = false ) -> String {
+        var string = asArray ? "[" : ""
+        for x in val {
+            if asArray {
+                string += String(format:"0x%02x, ", x )
+                
+            } else {
+                string += String(format:"%02x", x )
+            }
         }
+        string += asArray ? "]" : ""
+        return asArray ? string : string.uppercased()
     }
-    string += asArray ? "]" : ""
-    return asArray ? string : string.uppercased()
+    
+    /// 'AABB' --> \xaa\xbb'"""
+    @objc
+    public func hexRepToBin(_ val : String) -> [UInt8] {
+        var output : [UInt8] = []
+        var x = 0
+        while x < val.count {
+            if x+2 <= val.count {
+                output.append( UInt8(val[x ..< x + 2], radix:16)! )
+            } else {
+                output.append( UInt8(val[x ..< x+1], radix:16)! )
+                
+            }
+            x += 2
+        }
+        return output
+    }
 }
 
 public func binToHexRep( _ val : UInt8 ) -> String {
@@ -73,7 +94,7 @@ public func binToHex( _ val: UInt8 ) -> Int {
 }
 
 public func binToHex( _ val: [UInt8] ) -> UInt64 {
-    let hexVal = UInt64(binToHexRep(val), radix:16)!
+    let hexVal = UInt64(Utils().binToHexRep(val), radix:16)!
     return hexVal
 }
 
@@ -84,7 +105,7 @@ public func binToHex( _ val: ArraySlice<UInt8> ) -> UInt64 {
 
 public func hexToBin( _ val : UInt64 ) -> [UInt8] {
     let hexRep = String(format:"%lx", val)
-    return hexRepToBin( hexRep)
+    return Utils().hexRepToBin( hexRep)
 }
 
 public func binToInt( _ val: ArraySlice<UInt8> ) -> Int {
@@ -93,35 +114,19 @@ public func binToInt( _ val: ArraySlice<UInt8> ) -> Int {
 }
 
 public func binToInt( _ val: [UInt8] ) -> Int {
-    let hexVal = Int(binToHexRep(val), radix:16)!
+    let hexVal = Int(Utils().binToHexRep(val), radix:16)!
     return hexVal
 }
 
 public func intToBin(_ data : Int, pad : Int = 2) -> [UInt8] {
     if pad == 2 {
         let hex = String(format:"%02x", data)
-        return hexRepToBin(hex)
+        return Utils().hexRepToBin(hex)
     } else {
         let hex = String(format:"%04x", data)
-        return hexRepToBin(hex)
+        return Utils().hexRepToBin(hex)
 
     }
-}
-
-/// 'AABB' --> \xaa\xbb'"""
-public func hexRepToBin(_ val : String) -> [UInt8] {
-    var output : [UInt8] = []
-    var x = 0
-    while x < val.count {
-        if x+2 <= val.count {
-            output.append( UInt8(val[x ..< x + 2], radix:16)! )
-        } else {
-            output.append( UInt8(val[x ..< x+1], radix:16)! )
-
-        }
-        x += 2
-    }
-    return output
 }
 
 public func xor(_ kifd : [UInt8], _ response_kicc : [UInt8] ) -> [UInt8] {
@@ -182,19 +187,19 @@ public func desMAC(key : [UInt8], msg : [UInt8]) -> [UInt8]{
     Log.verbose("Calc mac" )
     for i in 0 ..< size {
         let tmp = [UInt8](msg[i*8 ..< i*8+8])
-        Log.verbose("x\(i): \(binToHexRep(tmp))" )
+        Log.verbose("x\(i): \(Utils().binToHexRep(tmp))" )
         y = DESEncrypt(key: [UInt8](key[0..<8]), message: tmp, iv: y)
-        Log.verbose("y\(i): \(binToHexRep(y))" )
+        Log.verbose("y\(i): \(Utils().binToHexRep(y))" )
     }
     
-    Log.verbose("y: \(binToHexRep(y))" )
-    Log.verbose("bkey: \(binToHexRep([UInt8](key[8..<16])))" )
-    Log.verbose("akey: \(binToHexRep([UInt8](key[0..<8])))" )
+    Log.verbose("y: \(Utils().binToHexRep(y))" )
+    Log.verbose("bkey: \(Utils().binToHexRep([UInt8](key[8..<16])))" )
+    Log.verbose("akey: \(Utils().binToHexRep([UInt8](key[0..<8])))" )
     let iv : [UInt8] = [0,0,0,0,0,0,0,0]
     let b = DESDecrypt(key: [UInt8](key[8..<16]), message: y, iv: iv, options:UInt32(kCCOptionECBMode))
-    Log.verbose( "b: \(binToHexRep(b))" )
+    Log.verbose( "b: \(Utils().binToHexRep(b))" )
     let a = DESEncrypt(key: [UInt8](key[0..<8]), message: b, iv: iv, options:UInt32(kCCOptionECBMode))
-    Log.verbose( "a: \(binToHexRep(a))" )
+    Log.verbose( "a: \(Utils().binToHexRep(a))" )
     
     return a
 }
@@ -301,13 +306,13 @@ public func asn1Length(_ data : [UInt8]) throws -> (Int, Int)  {
 @available(iOS 13, macOS 10.15, *)
 public func toAsn1Length(_ data : Int) throws -> [UInt8] {
     if data < 0x80 {
-        return hexRepToBin(String(format:"%02x", data))
+        return Utils().hexRepToBin(String(format:"%02x", data))
     }
     if data >= 0x80 && data <= 0xFF {
-        return [0x81] + hexRepToBin( String(format:"%02x",data))
+        return [0x81] + Utils().hexRepToBin( String(format:"%02x",data))
     }
     if data >= 0x0100 && data <= 0xFFFF {
-        return [0x82] + hexRepToBin( String(format:"%04x",data))
+        return [0x82] + Utils().hexRepToBin( String(format:"%04x",data))
     }
     
     throw NFCPassportReaderError.InvalidASN1Value

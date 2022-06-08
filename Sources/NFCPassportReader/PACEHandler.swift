@@ -105,7 +105,7 @@ public class PACEHandler {
             Log.verbose("digestAlg - \(digestAlg)" )
             Log.verbose("keyLength - \(keyLength)" )
             Log.verbose("keyLength - \(mrzKey)" )
-            Log.verbose("paceKey - \(binToHexRep(paceKey, asArray:true))" )
+            Log.verbose("paceKey - \(Utils().binToHexRep(paceKey, asArray:true))" )
 
             // First start the initial auth call
             tagReader.sendMSESetATMutualAuth(oid: paceOID, keyType: paceKeyType, completed: { [unowned self] response, error in
@@ -157,7 +157,7 @@ public class PACEHandler {
             do {
                 let data = response!.data
                 let encryptedNonce = try unwrapDO(tag: 0x80, wrappedData: data)
-                Log.verbose( "Encrypted nonce - \(binToHexRep(encryptedNonce, asArray:true))" )
+                Log.verbose( "Encrypted nonce - \(Utils().binToHexRep(encryptedNonce, asArray:true))" )
 
                 let decryptedNonce: [UInt8]
                 if self.cipherAlg == "DESede" {
@@ -170,7 +170,7 @@ public class PACEHandler {
                     return self.handleError( "Step1", "Unsupported cipher algorithm requested - \(cipherAlg)" )
                 }
 
-                Log.verbose( "Decrypted nonce - \(binToHexRep(decryptedNonce, asArray:true) )" )
+                Log.verbose( "Decrypted nonce - \(Utils().binToHexRep(decryptedNonce, asArray:true) )" )
                 
                 self.doStep2(passportNonce: decryptedNonce)
 
@@ -219,7 +219,7 @@ public class PACEHandler {
         guard let pcdMappingEncodedPublicKey = OpenSSLUtils.getPublicKeyData(from: mappingKey) else {
             return self.handleError( "Step2GM", "Unable to get public key from mapping key" )
         }
-        Log.verbose( "public mapping key - \(binToHexRep(pcdMappingEncodedPublicKey, asArray:true))")
+        Log.verbose( "public mapping key - \(Utils().binToHexRep(pcdMappingEncodedPublicKey, asArray:true))")
 
 
         Log.debug( "Sending public mapping key to passport..")
@@ -237,7 +237,7 @@ public class PACEHandler {
             }
             
             Log.debug( "Received passports public mapping key")
-            Log.verbose( "   public mapping key - \(binToHexRep(piccMappingEncodedPublicKey, asArray: true))")
+            Log.verbose( "   public mapping key - \(Utils().binToHexRep(piccMappingEncodedPublicKey, asArray: true))")
 
             // Do mapping agreement
 
@@ -301,7 +301,7 @@ public class PACEHandler {
         guard let publicKey = OpenSSLUtils.getPublicKeyData( from: ephemeralKeyPair ) else {
             return self.handleError( "Step3 KeyEx", "Unable to get public key from ephermeral key pair" )
         }
-        Log.verbose( "Ephemeral public key - \(binToHexRep(publicKey, asArray: true))")
+        Log.verbose( "Ephemeral public key - \(Utils().binToHexRep(publicKey, asArray: true))")
 
         // exchange public keys
         Log.debug( "Sending ephemeral public key to passport")
@@ -319,7 +319,7 @@ public class PACEHandler {
                 return sself.handleError( "Step3 KeyEx", "Unable to decode passports ephemeral key" )
             }
 
-            Log.verbose( "Received passports ephemeral public key - \(binToHexRep(passportEncodedPublicKey!, asArray: true))" )
+            Log.verbose( "Received passports ephemeral public key - \(Utils().binToHexRep(passportEncodedPublicKey!, asArray: true))" )
 
             sself.doStep3KeyAgreement( pcdKeyPair: ephemeralKeyPair, passportPublicKey: passportPublicKey)
         })
@@ -340,14 +340,14 @@ public class PACEHandler {
 
         Log.debug( "Computing shared secret...")
         let sharedSecret = OpenSSLUtils.computeSharedSecret(privateKeyPair: pcdKeyPair, publicKey: passportPublicKey)
-        Log.verbose( "Shared secret - \(binToHexRep(sharedSecret, asArray:true))")
+        Log.verbose( "Shared secret - \(Utils().binToHexRep(sharedSecret, asArray:true))")
 
         Log.debug( "Deriving ksEnc and ksMac keys from shared secret")
         let gen = SecureMessagingSessionKeyGenerator()
         let encKey = try! gen.deriveKey(keySeed: sharedSecret, cipherAlgName: cipherAlg, keyLength: keyLength, mode: .ENC_MODE)
         let macKey = try! gen.deriveKey(keySeed: sharedSecret, cipherAlgName: cipherAlg, keyLength: keyLength, mode: .MAC_MODE)
-        Log.verbose( "encKey - \(binToHexRep(encKey, asArray:true))")
-        Log.verbose( "macKey - \(binToHexRep(macKey, asArray:true))")
+        Log.verbose( "encKey - \(Utils().binToHexRep(encKey, asArray:true))")
+        Log.verbose( "macKey - \(Utils().binToHexRep(macKey, asArray:true))")
 
         // Step 4 - generate authentication token
         Log.debug( "Generating authentication token")
@@ -588,14 +588,14 @@ extension PACEHandler {
         }
         
         Log.verbose( "Generating Authentication Token" )
-        Log.verbose( "EncodedPubKey = \(binToHexRep(encodedPublicKeyData, asArray: true))" )
-        Log.verbose( "macKey = \(binToHexRep(macKey, asArray: true))" )
+        Log.verbose( "EncodedPubKey = \(Utils().binToHexRep(encodedPublicKeyData, asArray: true))" )
+        Log.verbose( "macKey = \(Utils().binToHexRep(macKey, asArray: true))" )
 
         let maccedPublicKeyDataObject = mac(algoName: cipherAlg == "DESede" ? .DES : .AES, key: macKey, msg: encodedPublicKeyData)
 
         // Take 8 bytes for auth token
         let authToken = [UInt8](maccedPublicKeyDataObject[0..<8])
-        Log.verbose( "Generated authToken = \(binToHexRep(authToken, asArray: true))" )
+        Log.verbose( "Generated authToken = \(Utils().binToHexRep(authToken, asArray: true))" )
         return authToken
     }
     

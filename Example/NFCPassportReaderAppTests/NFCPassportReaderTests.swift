@@ -20,12 +20,12 @@ final class NFCPassportReaderTests: XCTestCase {
 
     func testBinToHexRep() {
         let val : [UInt8] = [0x12, 0x24, 0x55, 0x77]
-        XCTAssertEqual( binToHexRep(val), "12245577" )
+        XCTAssertEqual( Utils().binToHexRep(val), "12245577" )
     }
     
     func testHexRepToBin() {
         let val : [UInt8] = [0x12, 0x24, 0x55, 0x77]
-        XCTAssertEqual( hexRepToBin("12245577"), val  )
+        XCTAssertEqual( Utils().hexRepToBin("12245577"), val  )
     }
     
     func testAsn1Length() {
@@ -136,21 +136,21 @@ final class NFCPassportReaderTests: XCTestCase {
         let iv : [UInt8] = [0, 0, 0, 0, 0, 0, 0, 0]
         let key : [UInt8] = [191, 73, 56, 112, 158, 148, 146, 127, 157, 76, 117, 8, 239, 128, 87, 42]
         let enc = tripleDESEncrypt(key: key, message: msg, iv: iv)
-        Log.debug("KEY: \(binToHexRep(key))")
-        Log.debug("MSG: \(binToHexRep(msg))")
-        Log.debug("ENC: \(binToHexRep(enc))")
+        Log.debug("KEY: \(Utils().binToHexRep(key))")
+        Log.debug("MSG: \(Utils().binToHexRep(msg))")
+        Log.debug("ENC: \(Utils().binToHexRep(enc))")
         
-        XCTAssertEqual( binToHexRep(enc), "4DAF068AB358BC9E8F5E916D3DEDE750D92315370E44D9B3" )
+        XCTAssertEqual( Utils().binToHexRep(enc), "4DAF068AB358BC9E8F5E916D3DEDE750D92315370E44D9B3" )
     }
     
     func testDES3Decryption() {
-        let enc = hexRepToBin("4DAF068AB358BC9E8F5E916D3DEDE750D92315370E44D9B3")
+        let enc = Utils().hexRepToBin("4DAF068AB358BC9E8F5E916D3DEDE750D92315370E44D9B3")
         let iv : [UInt8] = [0, 0, 0, 0, 0, 0, 0, 0]
         let key : [UInt8] = [191, 73, 56, 112, 158, 148, 146, 127, 157, 76, 117, 8, 239, 128, 87, 42]
         let dec = tripleDESDecrypt(key: key, message: enc, iv: iv)
-        Log.debug("KEY: \(binToHexRep(key))")
-        Log.debug("ENC: \(binToHexRep(enc))")
-        Log.debug("DEC: \(binToHexRep(dec))")
+        Log.debug("KEY: \(Utils().binToHexRep(key))")
+        Log.debug("ENC: \(Utils().binToHexRep(enc))")
+        Log.debug("DEC: \(Utils().binToHexRep(dec))")
         
         let val = String(data:Data(dec), encoding:.utf8)
         XCTAssertEqual( val, "maryhadalittlelambaaaaaa" )
@@ -158,9 +158,9 @@ final class NFCPassportReaderTests: XCTestCase {
     
     func testSecureMessagingProtect() {
         
-        let KSenc = hexRepToBin("8FDCFE759E40A4DF4575160B3BFB79FB")
-        let KSmac = hexRepToBin("2AE92531E55707D9C4CEF8C2D6E5AD70")
-        let ssc = hexRepToBin("73061884A0E57AA7")
+        let KSenc = Utils().hexRepToBin("8FDCFE759E40A4DF4575160B3BFB79FB")
+        let KSmac = Utils().hexRepToBin("2AE92531E55707D9C4CEF8C2D6E5AD70")
+        let ssc = Utils().hexRepToBin("73061884A0E57AA7")
         
         let sm = SecureMessaging(ksenc: KSenc, ksmac: KSmac, ssc: ssc)
         
@@ -174,7 +174,7 @@ final class NFCPassportReaderTests: XCTestCase {
         XCTAssertEqual( protApdu.p1Parameter, 0x02 )
         XCTAssertEqual( protApdu.p2Parameter, 0x0c )
         
-        let hexDataRep = binToHexRep( [UInt8](protApdu.data!))
+        let hexDataRep = Utils().binToHexRep( [UInt8](protApdu.data!))
         XCTAssertEqual( hexDataRep, "870901CC69089F8F1AB4698E08B6334B3ABD5A9E09" )
         XCTAssertEqual( protApdu.expectedResponseLength, 0 )
     }
@@ -182,17 +182,17 @@ final class NFCPassportReaderTests: XCTestCase {
     func testSecureMessagingUnprotectNoData() {
         
         // Note - same keys as above but SSC incremented by 1 as per spec
-        let KSenc = hexRepToBin("8FDCFE759E40A4DF4575160B3BFB79FB")
-        let KSmac = hexRepToBin("2AE92531E55707D9C4CEF8C2D6E5AD70")
-        let ssc = hexRepToBin("73061884A0E57AA8")
+        let KSenc = Utils().hexRepToBin("8FDCFE759E40A4DF4575160B3BFB79FB")
+        let KSmac = Utils().hexRepToBin("2AE92531E55707D9C4CEF8C2D6E5AD70")
+        let ssc = Utils().hexRepToBin("73061884A0E57AA8")
         
         let sm = SecureMessaging(ksenc: KSenc, ksmac: KSmac, ssc: ssc)
         
-        let data : [UInt8] = hexRepToBin("990290008E08C61E440E5DD415469000")
+        let data : [UInt8] = Utils().hexRepToBin("990290008E08C61E440E5DD415469000")
         let protRespApdu = ResponseAPDU(data: data, sw1: 0x90, sw2: 0x00)
         
         XCTAssertNoThrow(try sm.unprotect( rapdu: protRespApdu )) { rapdu in
-            XCTAssertEqual(binToHexRep(rapdu.data), "")
+            XCTAssertEqual(Utils().binToHexRep(rapdu.data), "")
             XCTAssertEqual( rapdu.sw1, 0x90 )
             XCTAssertEqual( rapdu.sw2, 0x00 )
         }
@@ -200,17 +200,17 @@ final class NFCPassportReaderTests: XCTestCase {
 
     func testSecureMessagingUnprotectWithData() {
         
-        let KSenc = hexRepToBin("8FDCFE759E40A4DF4575160B3BFB79FB")
-        let KSmac = hexRepToBin("2AE92531E55707D9C4CEF8C2D6E5AD70")
-        let ssc = hexRepToBin("73061884A0E57AAA")
+        let KSenc = Utils().hexRepToBin("8FDCFE759E40A4DF4575160B3BFB79FB")
+        let KSmac = Utils().hexRepToBin("2AE92531E55707D9C4CEF8C2D6E5AD70")
+        let ssc = Utils().hexRepToBin("73061884A0E57AAA")
         
         let sm = SecureMessaging(ksenc: KSenc, ksmac: KSmac, ssc: ssc)
         
-        let data : [UInt8] = hexRepToBin("87090156D0EFCC887F8973990290008E08D6B9C0DA21DC965F9000")
+        let data : [UInt8] = Utils().hexRepToBin("87090156D0EFCC887F8973990290008E08D6B9C0DA21DC965F9000")
         let protRespApdu = ResponseAPDU(data: data, sw1: 0x90, sw2: 0x00)
         
         XCTAssertNoThrow(try sm.unprotect( rapdu: protRespApdu )) { rapdu in
-            XCTAssertEqual(binToHexRep(rapdu.data), "615B5F1F")
+            XCTAssertEqual(Utils().binToHexRep(rapdu.data), "615B5F1F")
             XCTAssertEqual( rapdu.sw1, 0x90 )
             XCTAssertEqual( rapdu.sw2, 0x00 )
 
@@ -220,7 +220,7 @@ final class NFCPassportReaderTests: XCTestCase {
     
         func testConvertECDSAPlainTODer() {
             let sigText = "67e147aac644325792dfa0b1615956dc4ed54e8cd859341571db98003431936e0651e9a3cdbcea3c8accd75a6f6bf07eb6bcf9ad1728e21aa854049e634e6fbf"
-            let sig = hexRepToBin(sigText)
+            let sig = Utils().hexRepToBin(sigText)
             
             let ecsig = ECDSA_SIG_new()
             defer { ECDSA_SIG_free(ecsig) }

@@ -214,7 +214,7 @@ extension PassportReader {
         tagReader?.readCardAccess(completed: { [unowned self] data, error in
             var ca : CardAccess?
             if let data = data {
-                print( "Read CardAccess - data \(binToHexRep(data))" )
+                print( "Read CardAccess - data \(Utils().binToHexRep(data))" )
                 do {
                     ca = try CardAccess(data)
                 } catch {
@@ -336,7 +336,7 @@ extension PassportReader {
         Log.info( "Performing Active Authentication" )
 
         let challenge = generateRandomUInt8Array(8)
-        Log.verbose( "Generated Active Authentication challange - \(binToHexRep(challenge))")
+        Log.verbose( "Generated Active Authentication challange - \(Utils().binToHexRep(challenge))")
         self.tagReader?.doInternalAuthentication(challenge: challenge, completed: { (response, err) in
             if let response = response {
                 self.passport.verifyActiveAuthentication( challenge:challenge, signature:response.data )

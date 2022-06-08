@@ -545,7 +545,7 @@ public class OpenSSLUtils {
         CMAC_Update(ctx, message, message.count);
         CMAC_Final(ctx, &mac, &maclen);
         
-        Log.verbose( "aesMac - mac - \(binToHexRep(mac))" )
+        Log.verbose( "aesMac - mac - \(Utils().binToHexRep(mac))" )
         
         return [UInt8](mac[0..<maclen])
     }

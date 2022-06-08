@@ -115,11 +115,11 @@ public class BACHandler {
         Log.verbose("\tMRZ KEY - \(kmrz)")
         let hash = calcSHA1Hash( [UInt8](kmrz.data(using:.utf8)!) )
         
-        Log.verbose("\tsha1(MRZ_information): \(binToHexRep(hash))")
+        Log.verbose("\tsha1(MRZ_information): \(Utils().binToHexRep(hash))")
         
         let subHash = Array(hash[0..<16])
         Log.verbose("Take the most significant 16 bytes to form the Kseed")
-        Log.verbose("\tKseed: \(binToHexRep(subHash))" )
+        Log.verbose("\tKseed: \(Utils().binToHexRep(subHash))" )
         
         return Array(subHash)
     }
@@ -140,7 +140,7 @@ public class BACHandler {
         self.rnd_icc = rnd_icc
         
         Log.verbose("Request an 8 byte random number from the MRTD's chip")
-        Log.verbose("\tRND.ICC: " + binToHexRep(self.rnd_icc))
+        Log.verbose("\tRND.ICC: " + Utils().binToHexRep(self.rnd_icc))
         
         self.rnd_icc = rnd_icc
 
@@ -148,29 +148,29 @@ public class BACHandler {
         let kifd = generateRandomUInt8Array(16)
         
         Log.verbose("Generate an 8 byte random and a 16 byte random")
-        Log.verbose("\tRND.IFD: \(binToHexRep(rnd_ifd))" )
-        Log.verbose("\tRND.Kifd: \(binToHexRep(kifd))")
+        Log.verbose("\tRND.IFD: \(Utils().binToHexRep(rnd_ifd))" )
+        Log.verbose("\tRND.Kifd: \(Utils().binToHexRep(kifd))")
         
         let s = rnd_ifd + rnd_icc + kifd
         
         Log.verbose("Concatenate RND.IFD, RND.ICC and Kifd")
-        Log.verbose("\tS: \(binToHexRep(s))")
+        Log.verbose("\tS: \(Utils().binToHexRep(s))")
         
         let iv : [UInt8] = [0, 0, 0, 0, 0, 0, 0, 0]
         let eifd = tripleDESEncrypt(key: ksenc,message: s, iv: iv)
         
         Log.verbose("Encrypt S with TDES key Kenc as calculated in Appendix 5.2")
-        Log.verbose("\tEifd: \(binToHexRep(eifd))")
+        Log.verbose("\tEifd: \(Utils().binToHexRep(eifd))")
         
         let mifd = mac(algoName: .DES, key: ksmac, msg: pad(eifd, blockSize:8))
 
         Log.verbose("Compute MAC over eifd with TDES key Kmac as calculated in-Appendix 5.2")
-        Log.verbose("\tMifd: \(binToHexRep(mifd))")
+        Log.verbose("\tMifd: \(Utils().binToHexRep(mifd))")
         // Construct APDU
         
         let cmd_data = eifd + mifd
         Log.verbose("Construct command data for MUTUAL AUTHENTICATE")
-        Log.verbose("\tcmd_data: \(binToHexRep(cmd_data))")
+        Log.verbose("\tcmd_data: \(Utils().binToHexRep(cmd_data))")
         
         self.rnd_ifd = rnd_ifd
         self.kifd = kifd
@@ -185,14 +185,14 @@ public class BACHandler {
     /// @type data: a binary string
     /// @return: A set of two 16 bytes keys (KSenc, KSmac) and the SSC
     public func sessionKeys(data : [UInt8] ) throws -> ([UInt8], [UInt8], [UInt8])  {
-        Log.verbose("Decrypt and verify received data and compare received RND.IFD with generated RND.IFD \(binToHexRep(self.ksmac))" )
+        Log.verbose("Decrypt and verify received data and compare received RND.IFD with generated RND.IFD \(Utils().binToHexRep(self.ksmac))" )
         
         let response = tripleDESDecrypt(key: self.ksenc, message: [UInt8](data[0..<32]), iv: [0,0,0,0,0,0,0,0] )
 
         let response_kicc = [UInt8](response[16..<32])
         let Kseed = xor(self.kifd, response_kicc)
         Log.verbose("Calculate XOR of Kifd and Kicc")
-        Log.verbose("\tKseed: \(binToHexRep(Kseed))" )
+        Log.verbose("\tKseed: \(Utils().binToHexRep(Kseed))" )
         
         let smskg = SecureMessagingSessionKeyGenerator()
         let KSenc = try smskg.deriveKey(keySeed: Kseed, mode: .ENC_MODE)
@@ -202,13 +202,13 @@ public class BACHandler {
 //        let KSmac = self.keyDerivation(kseed: Kseed,c: KMAC)
         
         Log.verbose("Calculate Session Keys (KSenc and KSmac) using Appendix 5.1")
-        Log.verbose("\tKSenc: \(binToHexRep(KSenc))" )
-        Log.verbose("\tKSmac: \(binToHexRep(KSmac))" )
+        Log.verbose("\tKSenc: \(Utils().binToHexRep(KSenc))" )
+        Log.verbose("\tKSmac: \(Utils().binToHexRep(KSmac))" )
         
         
         let ssc = [UInt8](self.rnd_icc.suffix(4) + self.rnd_ifd.suffix(4))
         Log.verbose("Calculate Send Sequence Counter")
-        Log.verbose("\tSSC: \(binToHexRep(ssc))" )
+        Log.verbose("\tSSC: \(Utils().binToHexRep(ssc))" )
         return (KSenc, KSmac, ssc)
     }
     

@@ -114,7 +114,7 @@ class SOD : DataGroup {
         
         var sigData : Data?
         if content.type.hasPrefix("OCTET STRING" ) {
-            sigData = Data(hexRepToBin( content.value ))
+            sigData = Data(Utils().hexRepToBin( content.value ))
         }
         
         guard let ret = sigData else { throw OpenSSLError.UnableToExtractSignedDataFromPKCS7("noDataReturned") }
@@ -186,7 +186,7 @@ class SOD : DataGroup {
                    let digestVal = set.getChild(0) {
                     
                     if digestVal.type.hasPrefix("OCTET STRING" ) {
-                        sigData = Data(hexRepToBin( digestVal.value ) )
+                        sigData = Data(Utils().hexRepToBin( digestVal.value ) )
                     }
                 }
             }
@@ -211,7 +211,7 @@ class SOD : DataGroup {
         
         var sigData : Data?
         if signature.type.hasPrefix("OCTET STRING" ) {
-            sigData = Data(hexRepToBin( signature.value ))
+            sigData = Data(Utils().hexRepToBin( signature.value ))
         }
         
         guard let ret = sigData else { throw OpenSSLError.UnableToExtractSignedDataFromPKCS7("noDataReturned") }
